@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Siexther Deobfuscator - Warpah</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .header .brand {
+            font-size: 0.9em;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .input-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            transition: border 0.3s;
+            resize: vertical;
+        }
+
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        #inputScript {
+            min-height: 300px;
+            background: #f8f9fa;
+        }
+
+        #outputScript {
+            min-height: 400px;
+            background: #282c34;
+            color: #abb2bf;
+            line-height: 1.6;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+        }
+
+        .btn-warning:hover {
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+        }
+
+        .result {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-box .label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .stat-box .value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h4 {
+            margin-bottom: 8px;
+            color: #1976D2;
+        }
+
+        .info-box ul {
+            margin-left: 20px;
+            color: #555;
+        }
+
+        .info-box li {
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .stat-box .value {
+                font-size: 22px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔓 Siexther Deobfuscator</h1>
+            <p>Deobfuscate Lua Script dengan Mudah</p>
+            <div class="brand">by Warpah Exploits</div>
+        </div>
+
+        <!-- Alert Messages -->
+        <div id="alertSuccess" class="alert alert-success">
+            <strong>✅ Berhasil!</strong> Script berhasil di-deobfuscate!
+        </div>
+        <div id="alertError" class="alert alert-error">
+            <strong>❌ Error!</strong> <span id="errorMessage"></span>
+        </div>
+        <div id="alertInfo" class="alert alert-info">
+            <strong>ℹ️ Info:</strong> <span id="infoMessage"></span>
+        </div>
+
+        <!-- Input Card -->
+        <div class="card">
+            <div class="info-box">
+                <h4>📝 Cara Pakai:</h4>
+                <ul>
+                    <li>Paste script yang sudah di-obfuscate (Siexther/Luraph/dll) ke kotak di bawah</li>
+                    <li>Klik tombol "Deobfuscate Script"</li>
+                    <li>Hasil akan muncul otomatis di bagian bawah</li>
+                    <li>Support untuk script sangat panjang (unlimited)</li>
+                </ul>
+            </div>
+
+            <div class="input-group">
+                <label for="inputScript">📥 Input Script (Obfuscated):</label>
+                <textarea 
+                    id="inputScript" 
+                    placeholder="Paste script yang sudah di-obfuscate di sini...
+
+Contoh:
+return(function(...)local l={\&quot;\075\074\104\107...\&quot;} ... end)(...)
+
+Atau:
+loadstring(game:HttpGet(&quot;URL&quot;))()
+"></textarea>
+            </div>
+
+            <button id="btnDeobfuscate" class="btn" onclick="deobfuscateScript()">
+                🔓 Deobfuscate Script
+            </button>
+
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Sedang memproses script...</p>
+            </div>
+        </div>
+
+        <!-- Result Card -->
+        <div id="resultCard" class="card result">
+            <!-- Stats -->
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="label">📊 Total Karakter</div>
+                    <div class="value" id="statChars">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">📄 Total Baris</div>
+                    <div class="value" id="statLines">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">⏱️ Waktu Proses</div>
+                    <div class="value" id="statTime">0ms</div>
+                </div>
+            </div>
+
+            <!-- Output -->
+            <div class="input-group">
+                <label for="outputScript">📤 Hasil Deobfuscate:</label>
+                <textarea 
+                    id="outputScript" 
+                    readonly
+                    placeholder="Hasil deobfuscate akan muncul di sini..."></textarea>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="button-group">
+                <button class="btn btn-success" onclick="copyToClipboard()">
+                    📋 Copy Hasil
+                </button>
+                <button class="btn btn-warning" onclick="downloadScript()">
+                    💾 Download .lua
+                </button>
+                <button class="btn" onclick="clearAll()">
+                    🗑️ Clear All
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variable untuk menyimpan hasil
+        let deobfuscatedCode = '';
+        let processTime = 0;
+
+        // Fungsi untuk decode octal string
+        function decodeOctalString(str) {
+            return str.replace(/\\(\d{3})/g, function(match, octal) {
+                return String.fromCharCode(parseInt(octal, 8));
+            });
+        }
+
+        // Fungsi untuk extract dan decode strings dari script
+        function extractAndDecodeStrings(script) {
+            const stringPattern = /"((?:[^"\\]|\\.)*)"/g;
+            const strings = [];
+            let match;
+
+            while ((match = stringPattern.exec(script)) !== null) {
+                const encodedStr = match[1];
+                const decodedStr = decodeOctalString(encodedStr);
+                strings.push(decodedStr);
+            }
+
+            return strings;
+        }
+
+        // Fungsi utama deobfuscate
+        function deobfuscateScript() {
+            const startTime = performance.now();
+            
+            // Ambil input
+            const inputScript = document.getElementById('inputScript').value.trim();
+            
+            // Validasi input
+            if (!inputScript) {
+                showAlert('error', 'Input script tidak boleh kosong!');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('btnDeobfuscate').disabled = true;
+            hideAllAlerts();
+
+            // Simulasi async untuk smooth UX
+            setTimeout(() => {
+                try {
+                    // Hook loadstring untuk intercept code
+                    let interceptedCode = null;
+                    
+                    // Create sandbox environment
+                    const sandbox = {
+                        loadstring: function(code) {
+                            interceptedCode = code;
+                            return function() { return null; };
+                        },
+                        game: {
+                            HttpGet: function(url) {
+                                showAlert('info', 'Script mencoba load dari URL: ' + url);
+                                return '';
+                            }
+                        },
+                        // Add more Roblox API mocks if needed
+                        print: function() {},
+                        warn: function() {},
+                        wait: function() {},
+                        spawn: function() {},
+                        delay: function() {}
+                    };
+
+                    // Try to execute script in sandbox
+                    try {
+                        // Wrap script untuk capture loadstring calls
+                        const wrappedScript = `
+                            (function() {
+                                const oldLoadstring = loadstring;
+                                loadstring = function(code, ...) {
+                                    window.capturedCode = code;
+                                    return function() { return null; };
+                                };
+                                
+                                try {
+                                    ${inputScript}
+                                } catch(e) {
+                                    // Silent error
+                                }
+                                
+                                loadstring = oldLoadstring;
+                            })();
+                        `;
+
+                        // Execute dengan Function constructor
+                        const func = new Function('loadstring', 'game', 'print', 'warn', 'wait', 'spawn', 'delay', wrappedScript);
+                        func(sandbox.loadstring, sandbox.game, sandbox.print, sandbox.warn, sandbox.wait, sandbox.spawn, sandbox.delay);
+
+                        if (window.capturedCode) {
+                            interceptedCode = window.capturedCode;
+                            delete window.capturedCode;
+                        }
+                    } catch (e) {
+                        // Jika gagal execute, coba extract strings manual
+                        console.log('Fallback to manual string extraction');
+                    }
+
+                    // Jika berhasil intercept
+                    if (interceptedCode) {
+                        deobfuscatedCode = interceptedCode;
+                    } else {
+                        // Fallback: Extract dan decode strings manual
+                        const decodedStrings = extractAndDecodeStrings(inputScript);
+                        
+                        if (decodedStrings.length > 0) {
+                            // Reconstruct script dari decoded strings
+                            deobfuscatedCode = '-- Decoded Strings:\n\n';
+                            decodedStrings.forEach((str, index) => {
+                                // Filter printable characters
+                                const printable = str.split('').map(c => {
+                                    const code = c.charCodeAt(0);
+                                    return (code >= 32 && code <= 126) ? c : `\\x${code.toString(16).padStart(2, '0')}`;
+                                }).join('');
+                                
+                                deobfuscatedCode += `-- String ${index + 1}:\n${printable}\n\n`;
+                            });
+                            
+                            showAlert('info', 'Script di-decode menggunakan metode manual. Hasil mungkin tidak sempurna.');
+                        } else {
+                            throw new Error('Tidak dapat mengekstrak data dari script. Pastikan format script benar.');
+                        }
+                    }
+
+                    // Calculate stats
+                    const totalChars = deobfuscatedCode.length;
+                    const totalLines = deobfuscatedCode.split('\n').length;
+                    processTime = Math.round(performance.now() - startTime);
+
+                    // Update UI
+                    document.getElementById('outputScript').value = deobfuscatedCode;
+                    document.getElementById('statChars').textContent = totalChars.toLocaleString();
+                    document.getElementById('statLines').textContent = totalLines.toLocaleString();
+                    document.getElementById('statTime').textContent = processTime + 'ms';
+
+                    // Show result
+                    document.getElementById('resultCard').classList.add('show');
+                    showAlert('success', '');
+
+                    // Scroll to result
+                    document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+                } catch (error) {
+                    showAlert('error', error.message);
+                    console.error('Deobfuscation error:', error);
+                } finally {
+                    // Hide loading
+                    document.getElementById('loading').classList.remove('show');
+                    document.getElementById('btnDeobfuscate').disabled = false;
+                }
+            }, 100);
+        }
+
+        // Fungsi copy to clipboard
+        function copyToClipboard() {
+            const outputScript = document.getElementById('outputScript');
+            outputScript.select();
+            document.execCommand('copy');
+            
+            showAlert('success', 'Script berhasil di-copy ke clipboard!');
+            
+            // Reset alert after 2 seconds
+            setTimeout(() => {
+                document.getElementById('alertSuccess').textContent = '✅ Berhasil! Script berhasil di-deobfuscate!';
+            }, 2000);
+        }
+
+        // Fungsi download script
+        function downloadScript() {
+            if (!deobfuscatedCode) {
+                showAlert('error', 'Tidak ada script untuk di-download!');
+                return;
+            }
+
+            const blob = new Blob([deobfuscatedCode], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'deobfuscated_' + Date.now() + '.lua';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            showAlert('success', 'Script berhasil di-download!');
+            
+            setTimeout(() => {
+                document.getElementById('alertSuccess').innerHTML = '<strong>✅ Berhasil!</strong> Script berhasil di-deobfuscate!';
+            }, 2000);
+        }
+
+        // Fungsi clear all
+        function clearAll() {
+            if (confirm('Yakin ingin menghapus semua data?')) {
+                document.getElementById('inputScript').value = '';
+                document.getElementById('outputScript').value = '';
+                document.getElementById('resultCard').classList.remove('show');
+                deobfuscatedCode = '';
+                hideAllAlerts();
+                
+                showAlert('info', 'Semua data telah dihapus.');
+            }
+        }
+
+        // Fungsi show alert
+        function showAlert(type, message) {
+            hideAllAlerts();
+            
+            const alertId = 'alert' + type.charAt(0).toUpperCase() + type.slice(1);
+            const alertElement = document.getElementById(alertId);
+            
+            if (message) {
+                if (type === 'error') {
+                    document.getElementById('errorMessage').textContent = message;
+                } else if (type === 'info') {
+                    document.getElementById('infoMessage').textContent = message;
+                } else if (type === 'success') {
+                    alertElement.innerHTML = '<strong>✅ Berhasil!</strong> ' + message;
+                }
+            }
+            
+            alertElement.classList.add('show');
+        }
+
+        // Fungsi hide all alerts
+        function hideAllAlerts() {
+            document.getElementById('alertSuccess').classList.remove('show');
+            document.getElementById('alertError').classList.remove('show');
+            document.getElementById('alertInfo').classList.remove('show');
+        }
+
+        // Keyboard shortcut: Ctrl+Enter to deobfuscate
+        document.getElementById('inputScript').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault();
+                deobfuscateScript();
+            }
+        });
+
+        // Auto-hide alerts after 5 seconds
+        setInterval(() => {
+            const alerts = document.querySelectorAll('.alert.show');
+            alerts.forEach(alert => {
+                if (alert.id !== 'alertSuccess') {
+                    alert.classList.remove('show');
+                }
+            });
+        }, 5000);
+    </script>
+</body>
+</html>
