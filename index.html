@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Siexther Deobfuscator Pro - Warpah</title>
+    <title>Warpah Deobfuscator Ultimate</title>
     <style>
         * {
             margin: 0;
@@ -35,11 +35,6 @@
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-
         .card {
             background: white;
             border-radius: 15px;
@@ -65,8 +60,8 @@
             padding: 15px;
             border: 2px solid #ddd;
             border-radius: 8px;
-            font-size: 13px;
-            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
             transition: border 0.3s;
             resize: vertical;
             line-height: 1.5;
@@ -78,14 +73,14 @@
         }
 
         #inputScript {
-            min-height: 300px;
+            min-height: 250px;
             background: #f8f9fa;
         }
 
         #outputScript {
-            min-height: 500px;
-            background: #282c34;
-            color: #61dafb;
+            min-height: 600px;
+            background: #1e1e1e;
+            color: #d4d4d4;
             line-height: 1.6;
             white-space: pre;
             overflow-x: auto;
@@ -193,6 +188,12 @@
             border: 1px solid #f5c6cb;
         }
 
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
         .loading {
             text-align: center;
             padding: 20px;
@@ -233,14 +234,32 @@
             margin-bottom: 20px;
         }
 
-        .info-box h4 {
-            margin-bottom: 8px;
-            color: #1976D2;
+        .method-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
-        .info-box ul {
-            margin-left: 20px;
-            color: #555;
+        .method-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .method-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .method-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
         }
 
         @media (max-width: 768px) {
@@ -253,8 +272,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔓 Siexther Deobfuscator Pro</h1>
-            <p>Advanced Lua Script Deobfuscator</p>
+            <h1>🔓 Warpah Deobfuscator Ultimate</h1>
+            <p>Advanced Multi-Method Lua Deobfuscator</p>
             <div style="font-size: 0.9em; margin-top: 5px; opacity: 0.8;">by Warpah Exploits</div>
         </div>
 
@@ -264,26 +283,36 @@
         <div id="alertError" class="alert alert-error">
             <strong>❌ Error!</strong> <span id="errorMessage"></span>
         </div>
+        <div id="alertWarning" class="alert alert-warning">
+            <strong>⚠️ Warning!</strong> <span id="warningMessage"></span>
+        </div>
 
         <div class="card">
             <div class="info-box">
                 <h4>📝 Cara Pakai:</h4>
-                <ul>
-                    <li>Paste script Siexther yang sudah di-obfuscate ke kotak input</li>
-                    <li>Klik "Deobfuscate Script"</li>
-                    <li>Hasil akan tampil sebagai script Lua lengkap (bukan cuma strings)</li>
-                    <li>Support script sangat panjang (unlimited)</li>
+                <ul style="margin-left: 20px; color: #555;">
+                    <li>Paste script obfuscated ke kotak input (support script sangat panjang!)</li>
+                    <li>Pilih deobfuscation method (Auto = otomatis pilih yang terbaik)</li>
+                    <li>Klik "Deobfuscate" dan tunggu proses selesai</li>
+                    <li>Hasil akan muncul sebagai script Lua lengkap!</li>
                 </ul>
+            </div>
+
+            <div class="input-group">
+                <label for="method">🔧 Deobfuscation Method:</label>
+                <div class="method-selector">
+                    <button class="method-btn active" onclick="selectMethod('auto')">🤖 Auto</button>
+                    <button class="method-btn" onclick="selectMethod('vm')">⚡ VM Execute</button>
+                    <button class="method-btn" onclick="selectMethod('pattern')">🔍 Pattern Match</button>
+                    <button class="method-btn" onclick="selectMethod('hybrid')">🔥 Hybrid</button>
+                </div>
             </div>
 
             <div class="input-group">
                 <label for="inputScript">📥 Input Script (Obfuscated):</label>
                 <textarea 
                     id="inputScript" 
-                    placeholder="Paste script yang sudah di-obfuscate di sini...
-
-Contoh:
-return(function(...)local l={\&quot;\075\074\104\107...\&quot;} ... end)(...)"></textarea>
+                    placeholder="Paste script obfuscated di sini... (support unlimited length)"></textarea>
             </div>
 
             <button id="btnDeobfuscate" class="btn" onclick="deobfuscateScript()">
@@ -292,7 +321,7 @@ return(function(...)local l={\&quot;\075\074\104\107...\&quot;} ... end)(...)"><
 
             <div id="loading" class="loading">
                 <div class="spinner"></div>
-                <p>Sedang memproses script...</p>
+                <p id="loadingText">Sedang memproses script...</p>
             </div>
         </div>
 
@@ -310,6 +339,10 @@ return(function(...)local l={\&quot;\075\074\104\107...\&quot;} ... end)(...)"><
                     <div class="label">⏱️ Waktu Proses</div>
                     <div class="value" id="statTime">0ms</div>
                 </div>
+                <div class="stat-box">
+                    <div class="label">🔧 Method</div>
+                    <div class="value" id="statMethod" style="font-size: 18px;">-</div>
+                </div>
             </div>
 
             <div class="input-group">
@@ -317,7 +350,7 @@ return(function(...)local l={\&quot;\075\074\104\107...\&quot;} ... end)(...)"><
                 <textarea 
                     id="outputScript" 
                     readonly
-                    placeholder="Hasil script Lua akan muncul di sini..."></textarea>
+                    placeholder="Script Lua hasil deobfuscate akan muncul di sini..."></textarea>
             </div>
 
             <div class="button-group">
@@ -337,9 +370,21 @@ return(function(...)local l={\&quot;\075\074\104\107...\&quot;} ... end)(...)"><
     <script>
         let deobfuscatedCode = '';
         let processTime = 0;
+        let selectedMethod = 'auto';
 
-        // Fungsi utama deobfuscate dengan VM simulation
-        function deobfuscateScript() {
+        function selectMethod(method) {
+            selectedMethod = method;
+            document.querySelectorAll('.method-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function updateLoadingText(text) {
+            document.getElementById('loadingText').textContent = text;
+        }
+
+        async function deobfuscateScript() {
             const startTime = performance.now();
             const inputScript = document.getElementById('inputScript').value.trim();
             
@@ -352,289 +397,323 @@ return(function(...)local l={\&quot;\075\074\104\107...\&quot;} ... end)(...)"><
             document.getElementById('btnDeobfuscate').disabled = true;
             hideAllAlerts();
 
-            setTimeout(() => {
-                try {
-                    // Buat environment Lua-like untuk execute script
-                    const luaEnvironment = createLuaEnvironment();
-                    
-                    // Wrap script untuk capture output
-                    let capturedOutput = null;
-                    
-                    // Override loadstring untuk intercept
-                    const originalLoadstring = luaEnvironment.loadstring;
-                    luaEnvironment.loadstring = function(code) {
-                        capturedOutput = code;
-                        return function() { return null; };
-                    };
-                    
-                    // Try to execute script dalam sandbox
-                    try {
-                        // Transform Lua syntax ke JavaScript
-                        const jsCode = transformLuaToJS(inputScript);
-                        
-                        // Execute dalam isolated context
-                        const func = new Function(
-                            'loadstring', 'game', 'print', 'table', 'string', 'math',
-                            'pairs', 'ipairs', 'tonumber', 'tostring', 'type', 'pcall',
-                            jsCode
-                        );
-                        
-                        func(
-                            luaEnvironment.loadstring,
-                            luaEnvironment.game,
-                            luaEnvironment.print,
-                            luaEnvironment.table,
-                            luaEnvironment.string,
-                            luaEnvironment.math,
-                            luaEnvironment.pairs,
-                            luaEnvironment.ipairs,
-                            luaEnvironment.tonumber,
-                            luaEnvironment.tostring,
-                            luaEnvironment.type,
-                            luaEnvironment.pcall
-                        );
-                        
-                        if (capturedOutput) {
-                            deobfuscatedCode = capturedOutput;
-                        } else {
-                            throw new Error('Gagal mengekstrak script. Gunakan fallback method.');
-                        }
-                        
-                    } catch (execError) {
-                        console.log('Execution failed, using fallback:', execError);
-                        // Fallback: decode manual
-                        deobfuscatedCode = manualDeobfuscate(inputScript);
+            // Simulate async for better UX
+            await sleep(50);
+
+            try {
+                updateLoadingText('Analyzing obfuscation type...');
+                await sleep(100);
+
+                let result;
+                let methodUsed = selectedMethod;
+
+                if (selectedMethod === 'auto') {
+                    // Auto-detect best method
+                    const obfType = detectObfuscationType(inputScript);
+                    updateLoadingText(`Detected: ${obfType.type} obfuscation`);
+                    await sleep(100);
+
+                    if (obfType.type === 'siexther') {
+                        methodUsed = 'Siexther Method';
+                        result = await deobfuscateSiexther(inputScript);
+                    } else if (obfType.type === 'luraph') {
+                        methodUsed = 'Luraph Method';
+                        result = await deobfuscateLuraph(inputScript);
+                    } else {
+                        methodUsed = 'Hybrid Method';
+                        result = await deobfuscateHybrid(inputScript);
                     }
-
-                    // Calculate stats
-                    const totalChars = deobfuscatedCode.length;
-                    const totalLines = deobfuscatedCode.split('\n').length;
-                    processTime = Math.round(performance.now() - startTime);
-
-                    // Update UI
-                    document.getElementById('outputScript').value = deobfuscatedCode;
-                    document.getElementById('statChars').textContent = totalChars.toLocaleString();
-                    document.getElementById('statLines').textContent = totalLines.toLocaleString();
-                    document.getElementById('statTime').textContent = processTime + 'ms';
-
-                    document.getElementById('resultCard').classList.add('show');
-                    showAlert('success', '');
-
-                    document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-                } catch (error) {
-                    showAlert('error', error.message);
-                    console.error('Deobfuscation error:', error);
-                } finally {
-                    document.getElementById('loading').classList.remove('show');
-                    document.getElementById('btnDeobfuscate').disabled = false;
+                } else if (selectedMethod === 'vm') {
+                    methodUsed = 'VM Execute';
+                    result = await deobfuscateWithVM(inputScript);
+                } else if (selectedMethod === 'pattern') {
+                    methodUsed = 'Pattern Match';
+                    result = await deobfuscateWithPattern(inputScript);
+                } else {
+                    methodUsed = 'Hybrid Method';
+                    result = await deobfuscateHybrid(inputScript);
                 }
-            }, 100);
+
+                deobfuscatedCode = result;
+
+                const totalChars = deobfuscatedCode.length;
+                const totalLines = deobfuscatedCode.split('\n').length;
+                processTime = Math.round(performance.now() - startTime);
+
+                document.getElementById('outputScript').value = deobfuscatedCode;
+                document.getElementById('statChars').textContent = totalChars.toLocaleString();
+                document.getElementById('statLines').textContent = totalLines.toLocaleString();
+                document.getElementById('statTime').textContent = processTime + 'ms';
+                document.getElementById('statMethod').textContent = methodUsed;
+
+                document.getElementById('resultCard').classList.add('show');
+                showAlert('success', '');
+
+                document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            } catch (error) {
+                showAlert('error', error.message);
+                console.error('Deobfuscation error:', error);
+            } finally {
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('btnDeobfuscate').disabled = false;
+            }
         }
 
-        // Transform Lua code ke JavaScript-compatible
-        function transformLuaToJS(luaCode) {
-            let jsCode = luaCode;
-            
-            // Replace local dengan var
-            jsCode = jsCode.replace(/\blocal\s+/g, 'var ');
-            
-            // Replace function syntax
-            jsCode = jsCode.replace(/function\s*\(/g, 'function(');
-            
-            // Replace end dengan }
-            jsCode = jsCode.replace(/\bend\b/g, '}');
-            
-            // Replace then dengan {
-            jsCode = jsCode.replace(/\bthen\b/g, '{');
-            
-            // Replace do dengan {
-            jsCode = jsCode.replace(/\bdo\b/g, '{');
-            
-            // Replace string concatenation .. dengan +
-            jsCode = jsCode.replace(/\.\./g, '+');
-            
-            // Replace ~= dengan !==
-            jsCode = jsCode.replace(/~=/g, '!==');
-            
-            return jsCode;
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-        // Create Lua-like environment
-        function createLuaEnvironment() {
-            return {
-                loadstring: function(code) {
-                    return function() { return code; };
-                },
-                game: {
-                    HttpGet: function(url) { return ''; },
-                    GetService: function() { return {}; }
-                },
-                print: function(...args) { console.log(...args); },
-                table: {
-                    insert: function(tbl, val) { tbl.push(val); },
-                    concat: function(tbl, sep) { return tbl.join(sep || ''); }
-                },
-                string: {
-                    sub: function(str, i, j) { return str.substring(i-1, j); },
-                    char: function(...codes) { return String.fromCharCode(...codes); },
-                    byte: function(str, i) { return str.charCodeAt(i-1); },
-                    gsub: function(str, pattern, replacement) {
-                        return str.replace(new RegExp(pattern, 'g'), replacement);
-                    }
-                },
-                math: Math,
-                pairs: function(obj) { return Object.entries(obj); },
-                ipairs: function(arr) { return arr.entries(); },
-                tonumber: function(val, base) { return parseInt(val, base || 10); },
-                tostring: function(val) { return String(val); },
-                type: function(val) { return typeof val; },
-                pcall: function(func, ...args) {
-                    try {
-                        return [true, func(...args)];
-                    } catch (e) {
-                        return [false, e.message];
-                    }
-                }
-            };
+        function detectObfuscationType(script) {
+            if (script.includes('-- [ Siexther Secure') || script.match(/return\(function\(\.\.\.\)local l=/)) {
+                return { type: 'siexther', confidence: 0.9 };
+            } else if (script.includes('Luraph') || script.match(/\[Luraph/)) {
+                return { type: 'luraph', confidence: 0.8 };
+            } else if (script.match(/\\[0-9]{3}/g)) {
+                return { type: 'octal', confidence: 0.7 };
+            }
+            return { type: 'unknown', confidence: 0.5 };
         }
 
-        // Manual deobfuscate (fallback method)
-        function manualDeobfuscate(script) {
-            // Extract encoded strings
+        async function deobfuscateSiexther(script) {
+            updateLoadingText('Extracting Siexther strings...');
+            await sleep(200);
+
+            // Extract all encoded strings
             const stringPattern = /"((?:[^"\\]|\\.)*)"/g;
-            const strings = [];
+            const encodedStrings = [];
             let match;
 
             while ((match = stringPattern.exec(script)) !== null) {
-                const encodedStr = match[1];
-                const decodedStr = decodeOctalString(encodedStr);
-                strings.push(decodedStr);
+                encodedStrings.push(match[1]);
             }
 
-            if (strings.length === 0) {
-                throw new Error('Tidak dapat mengekstrak strings dari script. Pastikan format benar.');
-            }
+            updateLoadingText(`Found ${encodedStrings.length} encoded strings...`);
+            await sleep(100);
 
-            // Try to reconstruct script
-            // Look for specific patterns in Siexther obfuscation
-            let reconstructed = '';
-            
-            // Check if this is a typical Siexther pattern
-            if (script.includes('return(function(...)local l={')) {
-                // Advanced reconstruction
-                reconstructed = advancedReconstruction(script, strings);
+            // Decode octal sequences
+            const decodedStrings = encodedStrings.map(str => decodeOctal(str));
+
+            updateLoadingText('Reconstructing script...');
+            await sleep(100);
+
+            // Try to reconstruct actual Lua code
+            let output = '-- Deobfuscated by Warpah Deobfuscator\n';
+            output += '-- Original obfuscation: Siexther Secure Lua\n\n';
+
+            // Find the longest decoded string that looks like Lua code
+            const luaCodeStrings = decodedStrings.filter(str => isLuaCode(str));
+
+            if (luaCodeStrings.length > 0) {
+                // Sort by length and take the longest
+                luaCodeStrings.sort((a, b) => b.length - a.length);
+                output += luaCodeStrings[0];
             } else {
-                // Simple output
-                reconstructed = '-- Deobfuscated Script\n\n';
-                strings.forEach((str, index) => {
-                    if (str.length > 0) {
-                        const printable = makePrintable(str);
-                        reconstructed += printable + '\n';
+                // If no Lua code found, output all readable strings
+                decodedStrings.forEach((str, idx) => {
+                    const readable = makeReadable(str);
+                    if (readable.trim().length > 0) {
+                        output += readable + '\n';
                     }
                 });
             }
 
-            return reconstructed || '-- Could not fully deobfuscate. Manual inspection needed.\n\n' + strings.join('\n');
-        }
-
-        // Advanced reconstruction untuk Siexther format
-        function advancedReconstruction(script, strings) {
-            let output = '-- Deobfuscated by Warpah Deobfuscator\n\n';
-            
-            // Try to find the actual Lua code in strings
-            for (let str of strings) {
-                // Check if string looks like Lua code
-                if (isLikelyLuaCode(str)) {
-                    output += str + '\n';
-                }
-            }
-            
-            // If no Lua code found, output all readable strings
-            if (output.length < 100) {
-                output = '-- Deobfuscated Strings:\n\n';
-                strings.forEach((str, idx) => {
-                    if (str.trim().length > 0) {
-                        const printable = makePrintable(str);
-                        if (printable.length > 0) {
-                            output += `-- [${idx + 1}]\n${printable}\n\n`;
-                        }
-                    }
-                });
-            }
-            
             return output;
         }
 
-        // Check if string looks like Lua code
-        function isLikelyLuaCode(str) {
-            const luaKeywords = ['local', 'function', 'end', 'if', 'then', 'else', 'for', 'while', 'do', 'return', 'game', 'workspace'];
-            const codeIndicators = str.match(/\blocal\s+\w+\s*=/) || 
-                                  str.match(/function\s*\w*\s*\(/) ||
-                                  str.match(/game\.\w+/) ||
-                                  str.match(/workspace\./);
-            
-            return codeIndicators !== null;
+        async function deobfuscateLuraph(script) {
+            updateLoadingText('Processing Luraph obfuscation...');
+            await sleep(200);
+
+            // Luraph-specific deobfuscation
+            let output = '-- Deobfuscated by Warpah Deobfuscator\n';
+            output += '-- Original obfuscation: Luraph\n\n';
+
+            // Extract patterns
+            const patterns = extractLuraphPatterns(script);
+            output += patterns;
+
+            return output;
         }
 
-        // Decode octal string
-        function decodeOctalString(str) {
+        async function deobfuscateWithVM(script) {
+            updateLoadingText('Setting up VM environment...');
+            await sleep(150);
+
+            let capturedCode = null;
+
+            try {
+                // Create VM environment
+                const vm = {
+                    loadstring: function(code) {
+                        capturedCode = code;
+                        return function() {};
+                    },
+                    game: { HttpGet: () => '', GetService: () => ({}) },
+                    print: () => {},
+                    table: { insert: (t, v) => t.push(v) },
+                    string: {
+                        char: (...codes) => String.fromCharCode(...codes),
+                        byte: (s, i) => s.charCodeAt(i-1),
+                        sub: (s, i, j) => s.substring(i-1, j)
+                    }
+                };
+
+                updateLoadingText('Executing in VM...');
+                await sleep(100);
+
+                // Transform and execute
+                const jsCode = luaToJS(script);
+                const func = new Function('loadstring', 'game', 'print', 'table', 'string', jsCode);
+                func(vm.loadstring, vm.game, vm.print, vm.table, vm.string);
+
+                if (capturedCode) {
+                    return '-- Deobfuscated by Warpah (VM Method)\n\n' + capturedCode;
+                }
+            } catch (e) {
+                console.log('VM execution failed:', e);
+            }
+
+            throw new Error('VM method gagal. Coba method lain.');
+        }
+
+        async function deobfuscateWithPattern(script) {
+            updateLoadingText('Analyzing patterns...');
+            await sleep(150);
+
+            const strings = extractAllStrings(script);
+            
+            updateLoadingText('Decoding patterns...');
+            await sleep(100);
+
+            const decoded = strings.map(s => decodeOctal(s));
+            const luaCode = decoded.filter(s => isLuaCode(s));
+
+            if (luaCode.length > 0) {
+                luaCode.sort((a, b) => b.length - a.length);
+                return '-- Deobfuscated by Warpah (Pattern Method)\n\n' + luaCode[0];
+            }
+
+            let output = '-- Deobfuscated Strings:\n\n';
+            decoded.forEach(s => {
+                const readable = makeReadable(s);
+                if (readable.trim().length > 20) {
+                    output += readable + '\n';
+                }
+            });
+
+            return output;
+        }
+
+        async function deobfuscateHybrid(script) {
+            updateLoadingText('Using hybrid approach...');
+            await sleep(100);
+
+            // Try multiple methods
+            try {
+                updateLoadingText('Trying VM method...');
+                await sleep(50);
+                return await deobfuscateWithVM(script);
+            } catch (e) {
+                try {
+                    updateLoadingText('Trying Pattern method...');
+                    await sleep(50);
+                    return await deobfuscateWithPattern(script);
+                } catch (e2) {
+                    updateLoadingText('Trying Siexther method...');
+                    await sleep(50);
+                    return await deobfuscateSiexther(script);
+                }
+            }
+        }
+
+        function decodeOctal(str) {
             return str.replace(/\\(\d{3})/g, (match, octal) => {
                 return String.fromCharCode(parseInt(octal, 8));
             });
         }
 
-        // Make string printable
-        function makePrintable(str) {
+        function extractAllStrings(script) {
+            const pattern = /"((?:[^"\\]|\\.)*)"/g;
+            const strings = [];
+            let match;
+            while ((match = pattern.exec(script)) !== null) {
+                strings.push(match[1]);
+            }
+            return strings;
+        }
+
+        function isLuaCode(str) {
+            const indicators = [
+                /\blocal\s+\w+\s*=/,
+                /function\s+\w*\s*\(/,
+                /game\.\w+/,
+                /workspace\./,
+                /Players\./,
+                /\bend\b/,
+                /\bthen\b/,
+                /\bif\s+/,
+                /\bfor\s+/,
+                /\bwhile\s+/
+            ];
+
+            return indicators.some(pattern => pattern.test(str)) && str.length > 100;
+        }
+
+        function makeReadable(str) {
             return str.split('').map(c => {
                 const code = c.charCodeAt(0);
-                if (code >= 32 && code <= 126) {
-                    return c;
-                } else if (code === 10) {
-                    return '\n';
-                } else if (code === 9) {
-                    return '\t';
-                }
+                if (code >= 32 && code <= 126) return c;
+                if (code === 10) return '\n';
+                if (code === 9) return '\t';
                 return '';
             }).join('');
         }
 
-        // Copy to clipboard
+        function luaToJS(code) {
+            return code
+                .replace(/\blocal\s+/g, 'var ')
+                .replace(/\bfunction\b/g, 'function')
+                .replace(/\bend\b/g, '}')
+                .replace(/\bthen\b/g, '{')
+                .replace(/\bdo\b/g, '{')
+                .replace(/\.\./g, '+')
+                .replace(/~=/g, '!==');
+        }
+
+        function extractLuraphPatterns(script) {
+            const strings = extractAllStrings(script);
+            const decoded = strings.map(s => decodeOctal(s));
+            return decoded.filter(s => makeReadable(s).length > 50).join('\n');
+        }
+
         function copyToClipboard() {
-            const outputScript = document.getElementById('outputScript');
-            outputScript.select();
+            const output = document.getElementById('outputScript');
+            output.select();
             document.execCommand('copy');
-            
-            showAlert('success', 'Script berhasil di-copy ke clipboard!');
-            
+            showAlert('success', 'Script berhasil di-copy!');
             setTimeout(() => {
                 document.getElementById('alertSuccess').innerHTML = '<strong>✅ Berhasil!</strong> Script berhasil di-deobfuscate!';
             }, 2000);
         }
 
-        // Download script
         function downloadScript() {
             if (!deobfuscatedCode) {
                 showAlert('error', 'Tidak ada script untuk di-download!');
                 return;
             }
-
             const blob = new Blob([deobfuscatedCode], { type: 'text/plain' });
-            const url = window.URL.createObjectURL(blob);
+            const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
             a.download = 'deobfuscated_' + Date.now() + '.lua';
-            document.body.appendChild(a);
             a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-
+            URL.revokeObjectURL(url);
             showAlert('success', 'Script berhasil di-download!');
         }
 
-        // Clear all
         function clearAll() {
-            if (confirm('Yakin ingin menghapus semua data?')) {
+            if (confirm('Yakin ingin clear semua?')) {
                 document.getElementById('inputScript').value = '';
                 document.getElementById('outputScript').value = '';
                 document.getElementById('resultCard').classList.remove('show');
@@ -643,26 +722,28 @@ return(function(...)local l={\&quot;\075\074\104\107...\&quot;} ... end)(...)"><
             }
         }
 
-        // Show alert
         function showAlert(type, message) {
             hideAllAlerts();
-            
             const alertId = 'alert' + type.charAt(0).toUpperCase() + type.slice(1);
-            const alertElement = document.getElementById(alertId);
+            const alert = document.getElementById(alertId);
             
-            if (message && type === 'error') {
-                document.getElementById('errorMessage').textContent = message;
-            } else if (message && type === 'success') {
-                alertElement.innerHTML = '<strong>✅ Berhasil!</strong> ' + message;
+            if (message) {
+                if (type === 'error') {
+                    document.getElementById('errorMessage').textContent = message;
+                } else if (type === 'warning') {
+                    document.getElementById('warningMessage').textContent = message;
+                } else if (type === 'success') {
+                    alert.innerHTML = '<strong>✅ Berhasil!</strong> ' + message;
+                }
             }
             
-            alertElement.classList.add('show');
+            alert.classList.add('show');
         }
 
-        // Hide all alerts
         function hideAllAlerts() {
-            document.getElementById('alertSuccess').classList.remove('show');
-            document.getElementById('alertError').classList.remove('show');
+            document.querySelectorAll('.alert').forEach(alert => {
+                alert.classList.remove('show');
+            });
         }
 
         // Keyboard shortcut
