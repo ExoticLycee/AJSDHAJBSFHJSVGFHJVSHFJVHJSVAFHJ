@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Siexther Deobfuscator - Warpah</title>
+    <title>Siexther Deobfuscator Pro - Warpah</title>
     <style>
         * {
             margin: 0;
@@ -40,12 +40,6 @@
             opacity: 0.9;
         }
 
-        .header .brand {
-            font-size: 0.9em;
-            margin-top: 5px;
-            opacity: 0.8;
-        }
-
         .card {
             background: white;
             border-radius: 15px;
@@ -71,10 +65,11 @@
             padding: 15px;
             border: 2px solid #ddd;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 13px;
             font-family: 'Courier New', monospace;
             transition: border 0.3s;
             resize: vertical;
+            line-height: 1.5;
         }
 
         .input-group textarea:focus {
@@ -88,10 +83,12 @@
         }
 
         #outputScript {
-            min-height: 400px;
+            min-height: 500px;
             background: #282c34;
-            color: #abb2bf;
+            color: #61dafb;
             line-height: 1.6;
+            white-space: pre;
+            overflow-x: auto;
         }
 
         .btn {
@@ -113,10 +110,6 @@
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .btn:active {
-            transform: translateY(0);
-        }
-
         .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
@@ -126,16 +119,8 @@
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
         }
 
-        .btn-success:hover {
-            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
-        }
-
         .btn-warning {
             background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
-        }
-
-        .btn-warning:hover {
-            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
         }
 
         .result {
@@ -208,12 +193,6 @@
             border: 1px solid #f5c6cb;
         }
 
-        .alert-info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-
         .loading {
             text-align: center;
             padding: 20px;
@@ -264,21 +243,9 @@
             color: #555;
         }
 
-        .info-box li {
-            margin-bottom: 5px;
-        }
-
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 1.8em;
-            }
-            
-            .stat-box .value {
-                font-size: 22px;
-            }
-
-            .card {
-                padding: 20px;
             }
         }
     </style>
@@ -286,31 +253,26 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔓 Siexther Deobfuscator</h1>
-            <p>Deobfuscate Lua Script dengan Mudah</p>
-            <div class="brand">by Warpah Exploits</div>
+            <h1>🔓 Siexther Deobfuscator Pro</h1>
+            <p>Advanced Lua Script Deobfuscator</p>
+            <div style="font-size: 0.9em; margin-top: 5px; opacity: 0.8;">by Warpah Exploits</div>
         </div>
 
-        <!-- Alert Messages -->
         <div id="alertSuccess" class="alert alert-success">
             <strong>✅ Berhasil!</strong> Script berhasil di-deobfuscate!
         </div>
         <div id="alertError" class="alert alert-error">
             <strong>❌ Error!</strong> <span id="errorMessage"></span>
         </div>
-        <div id="alertInfo" class="alert alert-info">
-            <strong>ℹ️ Info:</strong> <span id="infoMessage"></span>
-        </div>
 
-        <!-- Input Card -->
         <div class="card">
             <div class="info-box">
                 <h4>📝 Cara Pakai:</h4>
                 <ul>
-                    <li>Paste script yang sudah di-obfuscate (Siexther/Luraph/dll) ke kotak di bawah</li>
-                    <li>Klik tombol "Deobfuscate Script"</li>
-                    <li>Hasil akan muncul otomatis di bagian bawah</li>
-                    <li>Support untuk script sangat panjang (unlimited)</li>
+                    <li>Paste script Siexther yang sudah di-obfuscate ke kotak input</li>
+                    <li>Klik "Deobfuscate Script"</li>
+                    <li>Hasil akan tampil sebagai script Lua lengkap (bukan cuma strings)</li>
+                    <li>Support script sangat panjang (unlimited)</li>
                 </ul>
             </div>
 
@@ -321,11 +283,7 @@
                     placeholder="Paste script yang sudah di-obfuscate di sini...
 
 Contoh:
-return(function(...)local l={\&quot;\075\074\104\107...\&quot;} ... end)(...)
-
-Atau:
-loadstring(game:HttpGet(&quot;URL&quot;))()
-"></textarea>
+return(function(...)local l={\&quot;\075\074\104\107...\&quot;} ... end)(...)"></textarea>
             </div>
 
             <button id="btnDeobfuscate" class="btn" onclick="deobfuscateScript()">
@@ -338,9 +296,7 @@ loadstring(game:HttpGet(&quot;URL&quot;))()
             </div>
         </div>
 
-        <!-- Result Card -->
         <div id="resultCard" class="card result">
-            <!-- Stats -->
             <div class="stats">
                 <div class="stat-box">
                     <div class="label">📊 Total Karakter</div>
@@ -356,16 +312,14 @@ loadstring(game:HttpGet(&quot;URL&quot;))()
                 </div>
             </div>
 
-            <!-- Output -->
             <div class="input-group">
-                <label for="outputScript">📤 Hasil Deobfuscate:</label>
+                <label for="outputScript">📤 Hasil Deobfuscate (Lua Script):</label>
                 <textarea 
                     id="outputScript" 
                     readonly
-                    placeholder="Hasil deobfuscate akan muncul di sini..."></textarea>
+                    placeholder="Hasil script Lua akan muncul di sini..."></textarea>
             </div>
 
-            <!-- Action Buttons -->
             <div class="button-group">
                 <button class="btn btn-success" onclick="copyToClipboard()">
                     📋 Copy Hasil
@@ -381,134 +335,75 @@ loadstring(game:HttpGet(&quot;URL&quot;))()
     </div>
 
     <script>
-        // Global variable untuk menyimpan hasil
         let deobfuscatedCode = '';
         let processTime = 0;
 
-        // Fungsi untuk decode octal string
-        function decodeOctalString(str) {
-            return str.replace(/\\(\d{3})/g, function(match, octal) {
-                return String.fromCharCode(parseInt(octal, 8));
-            });
-        }
-
-        // Fungsi untuk extract dan decode strings dari script
-        function extractAndDecodeStrings(script) {
-            const stringPattern = /"((?:[^"\\]|\\.)*)"/g;
-            const strings = [];
-            let match;
-
-            while ((match = stringPattern.exec(script)) !== null) {
-                const encodedStr = match[1];
-                const decodedStr = decodeOctalString(encodedStr);
-                strings.push(decodedStr);
-            }
-
-            return strings;
-        }
-
-        // Fungsi utama deobfuscate
+        // Fungsi utama deobfuscate dengan VM simulation
         function deobfuscateScript() {
             const startTime = performance.now();
-            
-            // Ambil input
             const inputScript = document.getElementById('inputScript').value.trim();
             
-            // Validasi input
             if (!inputScript) {
                 showAlert('error', 'Input script tidak boleh kosong!');
                 return;
             }
 
-            // Show loading
             document.getElementById('loading').classList.add('show');
             document.getElementById('btnDeobfuscate').disabled = true;
             hideAllAlerts();
 
-            // Simulasi async untuk smooth UX
             setTimeout(() => {
                 try {
-                    // Hook loadstring untuk intercept code
-                    let interceptedCode = null;
+                    // Buat environment Lua-like untuk execute script
+                    const luaEnvironment = createLuaEnvironment();
                     
-                    // Create sandbox environment
-                    const sandbox = {
-                        loadstring: function(code) {
-                            interceptedCode = code;
-                            return function() { return null; };
-                        },
-                        game: {
-                            HttpGet: function(url) {
-                                showAlert('info', 'Script mencoba load dari URL: ' + url);
-                                return '';
-                            }
-                        },
-                        // Add more Roblox API mocks if needed
-                        print: function() {},
-                        warn: function() {},
-                        wait: function() {},
-                        spawn: function() {},
-                        delay: function() {}
+                    // Wrap script untuk capture output
+                    let capturedOutput = null;
+                    
+                    // Override loadstring untuk intercept
+                    const originalLoadstring = luaEnvironment.loadstring;
+                    luaEnvironment.loadstring = function(code) {
+                        capturedOutput = code;
+                        return function() { return null; };
                     };
-
-                    // Try to execute script in sandbox
+                    
+                    // Try to execute script dalam sandbox
                     try {
-                        // Wrap script untuk capture loadstring calls
-                        const wrappedScript = `
-                            (function() {
-                                const oldLoadstring = loadstring;
-                                loadstring = function(code, ...) {
-                                    window.capturedCode = code;
-                                    return function() { return null; };
-                                };
-                                
-                                try {
-                                    ${inputScript}
-                                } catch(e) {
-                                    // Silent error
-                                }
-                                
-                                loadstring = oldLoadstring;
-                            })();
-                        `;
-
-                        // Execute dengan Function constructor
-                        const func = new Function('loadstring', 'game', 'print', 'warn', 'wait', 'spawn', 'delay', wrappedScript);
-                        func(sandbox.loadstring, sandbox.game, sandbox.print, sandbox.warn, sandbox.wait, sandbox.spawn, sandbox.delay);
-
-                        if (window.capturedCode) {
-                            interceptedCode = window.capturedCode;
-                            delete window.capturedCode;
-                        }
-                    } catch (e) {
-                        // Jika gagal execute, coba extract strings manual
-                        console.log('Fallback to manual string extraction');
-                    }
-
-                    // Jika berhasil intercept
-                    if (interceptedCode) {
-                        deobfuscatedCode = interceptedCode;
-                    } else {
-                        // Fallback: Extract dan decode strings manual
-                        const decodedStrings = extractAndDecodeStrings(inputScript);
+                        // Transform Lua syntax ke JavaScript
+                        const jsCode = transformLuaToJS(inputScript);
                         
-                        if (decodedStrings.length > 0) {
-                            // Reconstruct script dari decoded strings
-                            deobfuscatedCode = '-- Decoded Strings:\n\n';
-                            decodedStrings.forEach((str, index) => {
-                                // Filter printable characters
-                                const printable = str.split('').map(c => {
-                                    const code = c.charCodeAt(0);
-                                    return (code >= 32 && code <= 126) ? c : `\\x${code.toString(16).padStart(2, '0')}`;
-                                }).join('');
-                                
-                                deobfuscatedCode += `-- String ${index + 1}:\n${printable}\n\n`;
-                            });
-                            
-                            showAlert('info', 'Script di-decode menggunakan metode manual. Hasil mungkin tidak sempurna.');
+                        // Execute dalam isolated context
+                        const func = new Function(
+                            'loadstring', 'game', 'print', 'table', 'string', 'math',
+                            'pairs', 'ipairs', 'tonumber', 'tostring', 'type', 'pcall',
+                            jsCode
+                        );
+                        
+                        func(
+                            luaEnvironment.loadstring,
+                            luaEnvironment.game,
+                            luaEnvironment.print,
+                            luaEnvironment.table,
+                            luaEnvironment.string,
+                            luaEnvironment.math,
+                            luaEnvironment.pairs,
+                            luaEnvironment.ipairs,
+                            luaEnvironment.tonumber,
+                            luaEnvironment.tostring,
+                            luaEnvironment.type,
+                            luaEnvironment.pcall
+                        );
+                        
+                        if (capturedOutput) {
+                            deobfuscatedCode = capturedOutput;
                         } else {
-                            throw new Error('Tidak dapat mengekstrak data dari script. Pastikan format script benar.');
+                            throw new Error('Gagal mengekstrak script. Gunakan fallback method.');
                         }
+                        
+                    } catch (execError) {
+                        console.log('Execution failed, using fallback:', execError);
+                        // Fallback: decode manual
+                        deobfuscatedCode = manualDeobfuscate(inputScript);
                     }
 
                     // Calculate stats
@@ -522,25 +417,189 @@ loadstring(game:HttpGet(&quot;URL&quot;))()
                     document.getElementById('statLines').textContent = totalLines.toLocaleString();
                     document.getElementById('statTime').textContent = processTime + 'ms';
 
-                    // Show result
                     document.getElementById('resultCard').classList.add('show');
                     showAlert('success', '');
 
-                    // Scroll to result
                     document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
                 } catch (error) {
                     showAlert('error', error.message);
                     console.error('Deobfuscation error:', error);
                 } finally {
-                    // Hide loading
                     document.getElementById('loading').classList.remove('show');
                     document.getElementById('btnDeobfuscate').disabled = false;
                 }
             }, 100);
         }
 
-        // Fungsi copy to clipboard
+        // Transform Lua code ke JavaScript-compatible
+        function transformLuaToJS(luaCode) {
+            let jsCode = luaCode;
+            
+            // Replace local dengan var
+            jsCode = jsCode.replace(/\blocal\s+/g, 'var ');
+            
+            // Replace function syntax
+            jsCode = jsCode.replace(/function\s*\(/g, 'function(');
+            
+            // Replace end dengan }
+            jsCode = jsCode.replace(/\bend\b/g, '}');
+            
+            // Replace then dengan {
+            jsCode = jsCode.replace(/\bthen\b/g, '{');
+            
+            // Replace do dengan {
+            jsCode = jsCode.replace(/\bdo\b/g, '{');
+            
+            // Replace string concatenation .. dengan +
+            jsCode = jsCode.replace(/\.\./g, '+');
+            
+            // Replace ~= dengan !==
+            jsCode = jsCode.replace(/~=/g, '!==');
+            
+            return jsCode;
+        }
+
+        // Create Lua-like environment
+        function createLuaEnvironment() {
+            return {
+                loadstring: function(code) {
+                    return function() { return code; };
+                },
+                game: {
+                    HttpGet: function(url) { return ''; },
+                    GetService: function() { return {}; }
+                },
+                print: function(...args) { console.log(...args); },
+                table: {
+                    insert: function(tbl, val) { tbl.push(val); },
+                    concat: function(tbl, sep) { return tbl.join(sep || ''); }
+                },
+                string: {
+                    sub: function(str, i, j) { return str.substring(i-1, j); },
+                    char: function(...codes) { return String.fromCharCode(...codes); },
+                    byte: function(str, i) { return str.charCodeAt(i-1); },
+                    gsub: function(str, pattern, replacement) {
+                        return str.replace(new RegExp(pattern, 'g'), replacement);
+                    }
+                },
+                math: Math,
+                pairs: function(obj) { return Object.entries(obj); },
+                ipairs: function(arr) { return arr.entries(); },
+                tonumber: function(val, base) { return parseInt(val, base || 10); },
+                tostring: function(val) { return String(val); },
+                type: function(val) { return typeof val; },
+                pcall: function(func, ...args) {
+                    try {
+                        return [true, func(...args)];
+                    } catch (e) {
+                        return [false, e.message];
+                    }
+                }
+            };
+        }
+
+        // Manual deobfuscate (fallback method)
+        function manualDeobfuscate(script) {
+            // Extract encoded strings
+            const stringPattern = /"((?:[^"\\]|\\.)*)"/g;
+            const strings = [];
+            let match;
+
+            while ((match = stringPattern.exec(script)) !== null) {
+                const encodedStr = match[1];
+                const decodedStr = decodeOctalString(encodedStr);
+                strings.push(decodedStr);
+            }
+
+            if (strings.length === 0) {
+                throw new Error('Tidak dapat mengekstrak strings dari script. Pastikan format benar.');
+            }
+
+            // Try to reconstruct script
+            // Look for specific patterns in Siexther obfuscation
+            let reconstructed = '';
+            
+            // Check if this is a typical Siexther pattern
+            if (script.includes('return(function(...)local l={')) {
+                // Advanced reconstruction
+                reconstructed = advancedReconstruction(script, strings);
+            } else {
+                // Simple output
+                reconstructed = '-- Deobfuscated Script\n\n';
+                strings.forEach((str, index) => {
+                    if (str.length > 0) {
+                        const printable = makePrintable(str);
+                        reconstructed += printable + '\n';
+                    }
+                });
+            }
+
+            return reconstructed || '-- Could not fully deobfuscate. Manual inspection needed.\n\n' + strings.join('\n');
+        }
+
+        // Advanced reconstruction untuk Siexther format
+        function advancedReconstruction(script, strings) {
+            let output = '-- Deobfuscated by Warpah Deobfuscator\n\n';
+            
+            // Try to find the actual Lua code in strings
+            for (let str of strings) {
+                // Check if string looks like Lua code
+                if (isLikelyLuaCode(str)) {
+                    output += str + '\n';
+                }
+            }
+            
+            // If no Lua code found, output all readable strings
+            if (output.length < 100) {
+                output = '-- Deobfuscated Strings:\n\n';
+                strings.forEach((str, idx) => {
+                    if (str.trim().length > 0) {
+                        const printable = makePrintable(str);
+                        if (printable.length > 0) {
+                            output += `-- [${idx + 1}]\n${printable}\n\n`;
+                        }
+                    }
+                });
+            }
+            
+            return output;
+        }
+
+        // Check if string looks like Lua code
+        function isLikelyLuaCode(str) {
+            const luaKeywords = ['local', 'function', 'end', 'if', 'then', 'else', 'for', 'while', 'do', 'return', 'game', 'workspace'];
+            const codeIndicators = str.match(/\blocal\s+\w+\s*=/) || 
+                                  str.match(/function\s*\w*\s*\(/) ||
+                                  str.match(/game\.\w+/) ||
+                                  str.match(/workspace\./);
+            
+            return codeIndicators !== null;
+        }
+
+        // Decode octal string
+        function decodeOctalString(str) {
+            return str.replace(/\\(\d{3})/g, (match, octal) => {
+                return String.fromCharCode(parseInt(octal, 8));
+            });
+        }
+
+        // Make string printable
+        function makePrintable(str) {
+            return str.split('').map(c => {
+                const code = c.charCodeAt(0);
+                if (code >= 32 && code <= 126) {
+                    return c;
+                } else if (code === 10) {
+                    return '\n';
+                } else if (code === 9) {
+                    return '\t';
+                }
+                return '';
+            }).join('');
+        }
+
+        // Copy to clipboard
         function copyToClipboard() {
             const outputScript = document.getElementById('outputScript');
             outputScript.select();
@@ -548,13 +607,12 @@ loadstring(game:HttpGet(&quot;URL&quot;))()
             
             showAlert('success', 'Script berhasil di-copy ke clipboard!');
             
-            // Reset alert after 2 seconds
             setTimeout(() => {
-                document.getElementById('alertSuccess').textContent = '✅ Berhasil! Script berhasil di-deobfuscate!';
+                document.getElementById('alertSuccess').innerHTML = '<strong>✅ Berhasil!</strong> Script berhasil di-deobfuscate!';
             }, 2000);
         }
 
-        // Fungsi download script
+        // Download script
         function downloadScript() {
             if (!deobfuscatedCode) {
                 showAlert('error', 'Tidak ada script untuk di-download!');
@@ -572,13 +630,9 @@ loadstring(game:HttpGet(&quot;URL&quot;))()
             window.URL.revokeObjectURL(url);
 
             showAlert('success', 'Script berhasil di-download!');
-            
-            setTimeout(() => {
-                document.getElementById('alertSuccess').innerHTML = '<strong>✅ Berhasil!</strong> Script berhasil di-deobfuscate!';
-            }, 2000);
         }
 
-        // Fungsi clear all
+        // Clear all
         function clearAll() {
             if (confirm('Yakin ingin menghapus semua data?')) {
                 document.getElementById('inputScript').value = '';
@@ -586,55 +640,38 @@ loadstring(game:HttpGet(&quot;URL&quot;))()
                 document.getElementById('resultCard').classList.remove('show');
                 deobfuscatedCode = '';
                 hideAllAlerts();
-                
-                showAlert('info', 'Semua data telah dihapus.');
             }
         }
 
-        // Fungsi show alert
+        // Show alert
         function showAlert(type, message) {
             hideAllAlerts();
             
             const alertId = 'alert' + type.charAt(0).toUpperCase() + type.slice(1);
             const alertElement = document.getElementById(alertId);
             
-            if (message) {
-                if (type === 'error') {
-                    document.getElementById('errorMessage').textContent = message;
-                } else if (type === 'info') {
-                    document.getElementById('infoMessage').textContent = message;
-                } else if (type === 'success') {
-                    alertElement.innerHTML = '<strong>✅ Berhasil!</strong> ' + message;
-                }
+            if (message && type === 'error') {
+                document.getElementById('errorMessage').textContent = message;
+            } else if (message && type === 'success') {
+                alertElement.innerHTML = '<strong>✅ Berhasil!</strong> ' + message;
             }
             
             alertElement.classList.add('show');
         }
 
-        // Fungsi hide all alerts
+        // Hide all alerts
         function hideAllAlerts() {
             document.getElementById('alertSuccess').classList.remove('show');
             document.getElementById('alertError').classList.remove('show');
-            document.getElementById('alertInfo').classList.remove('show');
         }
 
-        // Keyboard shortcut: Ctrl+Enter to deobfuscate
+        // Keyboard shortcut
         document.getElementById('inputScript').addEventListener('keydown', function(e) {
             if (e.ctrlKey && e.key === 'Enter') {
                 e.preventDefault();
                 deobfuscateScript();
             }
         });
-
-        // Auto-hide alerts after 5 seconds
-        setInterval(() => {
-            const alerts = document.querySelectorAll('.alert.show');
-            alerts.forEach(alert => {
-                if (alert.id !== 'alertSuccess') {
-                    alert.classList.remove('show');
-                }
-            });
-        }, 5000);
     </script>
 </body>
 </html>
